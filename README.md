@@ -1,5 +1,7 @@
 # Hello Triangle
 
+## All information taken from [learnopengl](https://learnopengl.com/#!Getting-started/Hello-Triangle)
+
 ![](/home/tuturu/Projects/Games/3D/pipeline.png)
 
 OpenGL manages 3D coordinates to 2D coordinates using its graphics pipeline.

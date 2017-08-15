@@ -1,0 +1,79 @@
+<h1 id="hello-triangle">Hello Triangle</h1>
+<div class="figure">
+<img src="/home/tuturu/Projects/Games/3D/pipeline.png" alt="" />
+
+</div>
+<p>OpenGL manages 3D coordinates to 2D coordinates using its graphics pipeline.</p>
+<ul>
+<li>There is a difference between a 2D coordinate and a pixel.</li>
+</ul>
+<p>A list of three 3D coordinates is used to form a triangle. This array list is called <strong>Vertex Data</strong>.</p>
+<p>The first part of the pipeline is the vertex shader.</p>
+<ul>
+<li>Its main purpose is to transform 3D coordinates into different 3D coordinates.</li>
+</ul>
+<p>The <strong>primitive assembly</strong> stage takes as input all the vertices from the vertex shader that form a primitive and asselbles all the points.</p>
+<p>The output of the primitive assembly stage is passed to the <strong>geometry shader</strong>. This generates a second triangle out of the given shape.</p>
+<p>The output of the geometry shader is then passed on to the <strong>rasterization stage</strong>. This stage maps the pixels to the final screen, resulting in <em>fragments</em>. Before the fragment shader runs, <em>clipping</em> is performed. Clipping discards all fragments, increasing performance.</p>
+<p>Fragment shaders are used to calculate color, and is the stage where advanced OpenGL effects occur.</p>
+<p>The final object will pass through a final stage that is called the <strong>alpha test and blending</strong> stage.</p>
+<ul>
+<li>This stage checks for a corresponding <strong>depth</strong> value to check if a fragment is behind or in front of another object and should be discarded accordingly.</li>
+<li>The stage also checks for alpha values and blends the objects accordingly.</li>
+</ul>
+<h2 id="vertex-input">Vertex Input</h2>
+<p>OpenGL is a 3D graphics library so all coordinates are in x, y, and z coordinates.</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">float</span> vertices[] = {
+    <span class="fl">-0.</span><span class="er">5f</span>, <span class="fl">-0.</span><span class="er">5f</span>, <span class="fl">0.</span><span class="er">0f</span>,
+     <span class="fl">0.</span><span class="er">5f</span>, <span class="fl">-0.</span><span class="er">5f</span>, <span class="fl">0.</span><span class="er">0f</span>,
+     <span class="fl">0.</span><span class="er">0f</span>,  <span class="fl">0.</span><span class="er">5f</span>, <span class="fl">0.</span><span class="er">0f</span>
+};  </code></pre></div>
+<h3 id="from-learnopengl.com----normalized-device-coordinates">From learnopengl.com -- Normalized Device Coordinates</h3>
+<div style="text-align: center; color: #808080; font-size: 1em;">
+<p>Once your vertex coordinates have been processed in the vertex shader, they should be in normalized device coordinates which is a small space where the x, y and z values vary from -1.0 to 1.0. Any coordinates that fall outside this range will be discarded/clipped and won't be visible on your screen. Below you can see the triangle we specified within normalized device coordinates (ignoring the z axis):</p>
+<div class="figure">
+<img src="/home/tuturu/Projects/Games/3D/ndc.png" alt="" />
+
+</div>
+<p>Unlike usual screen coordinates the positive y-axis points in the up-direction and the (0,0) coordinates are at the center of the graph, instead of top-left. Eventually you want all the (transformed) coordinates to end up in this coordinate space, otherwise they won't be visible.</p>
+<p>Your NDC coordinates will then be transformed to screen-space coordinates via the viewport transform using the data you provided with glViewport. The resulting screen-space coordinates are then transformed to fragments as inputs to your fragment shader.</p>
+</div>
+<p>From the vertex data to the vertex shader, we need to access the memory on the GPU. This data is managed by <strong>vertex buffer objects (VBO)</strong>.</p>
+<p>The vertex buffer has a unique ID corresponding to that buffer. We can generate one with a buffer ID using <strong>glGenBuffers</strong> function. We can bind the newly created buffer to the GL_ARRAY_BUFFER target with the <strong>glBindBuffer</strong> function. The <strong>glBufferData</strong> function copies the previously defined vertex data into the buffer's memory.</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">    <span class="dt">unsigned</span> <span class="dt">int</span> VBO;
+    glGenBuffers(<span class="dv">1</span>, &amp;VBO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, <span class="kw">sizeof</span>(vertices), vertices, GL_STATIC_DRAW);</code></pre></div>
+<p>Any buffer calls we make on the GL_ARRAY_BUFFER target will configure the currently bound buffer, which is <strong>VBO</strong>.</p>
+<p>The function <strong>glBufferData</strong> copies user-defined data into the currently bound buffer. The function is split into four arguments.</p>
+<ol style="list-style-type: decimal">
+<li>The type of buffer we want to copy data into: which is the VBO currently bound to the GL_ARRAY_BUFFER target.</li>
+<li>The size of the data we want to pass to the buffer.</li>
+<li>The actual data we want to send.</li>
+<li>How the graphics card should manage the given data, which can come in three forms:
+<ul>
+<li>GL_STATIC_DRAW: the data will most likely not change at all or very rarely.</li>
+<li>GL_DYNAMIC_DRAW: the data will likely change a lot.</li>
+<li>GL_STREAM_DRAW: the data will change every time it is drawn.</li>
+</ul></li>
+</ol>
+<p>Next we want to create a vertex and fragment shader that actually processes this data.</p>
+<h2 id="vertex-shader">Vertex Shader</h2>
+<p>Modern OpenGL requires that we at least set up a vertex and fragment shader to render.</p>
+<p>We need to write the vertex shader in GLSL (OpenGL Shading Language).</p>
+<div class="sourceCode"><pre class="sourceCode glsl"><code class="sourceCode glsl"><span class="ot">#version 330 core</span>
+<span class="fu">layout</span> (location = <span class="dv">0</span>) <span class="dt">in</span> <span class="dt">vec3</span> aPos;
+
+<span class="dt">void</span> <span class="fu">main</span>()
+{
+    <span class="fu">gl_Position</span> = <span class="dt">vec4</span>(aPos.<span class="fu">x</span>, aPos.<span class="fu">y</span>, aPos.<span class="fu">z</span>, <span class="fl">1.0</span>);
+}</code></pre></div>
+<h3 id="from-learnopengl.com">From learnopengl.com</h3>
+<div style="text-align: center; color: #808080; font-size: 1em;">
+<p>As you can see, GLSL looks similar to C. Each shader begins with a declaration of its version. Since OpenGL 3.3 and higher the version numbers of GLSL match the version of OpenGL (GLSL version 420 corresponds to OpenGL version 4.2 for example). We also explicitly mention we're using core profile functionality.</p>
+<p>Next we declare all the input vertex attributes in the vertex shader with the in keyword. Right now we only care about position data so we only need a single vertex attribute. GLSL has a vector datatype that contains 1 to 4 floats based on its postfix digit. Since each vertex has a 3D coordinate we create a vec3 input variable with the name aPos. We also specifically set the location of the input variable via layout (location = 0) and you'll later see that why we're going to need that location.</p>
+<p>Vector</p>
+<p>In graphics programming we use the mathematical concept of a vector quite often, since it neatly represents positions/directions in any space and has useful mathematical properties. A vector in GLSL has a maximum size of 4 and each of its values can be retrieved via vec.x, vec.y, vec.z and vec.w respectively where each of them represents a coordinate in space. Note that the vec.w component is not used as a position in space (we're dealing with 3D, not 4D) but is used for something called perspective division. We'll discuss vectors in much greater depth in a later tutorial.</p>
+<p>To set the output of the vertex shader we have to assign the position data to the predefined gl_Position variable which is a vec4 behind the scenes. At the end of the main function, whatever we set gl_Position to will be used as the output of the vertex shader. Since our input is a vector of size 3 we have to cast this to a vector of size 4. We can do this by inserting the vec3 values inside the constructor of vec4 and set its w component to 1.0f (we will explain why in a later tutorial).</p>
+</div>

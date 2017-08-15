@@ -29,11 +29,11 @@ The final object will pass through a final stage that is called the **alpha test
 OpenGL is a 3D graphics library so all coordinates are in x, y, and z coordinates.
 
 ```c++
-float vertices[] = {
-    -0.5f, -0.5f, 0.0f,
-     0.5f, -0.5f, 0.0f,
-     0.0f,  0.5f, 0.0f
-};  
+	float vertices[] = {
+    		-0.5f, -0.5f, 0.0f,
+     		 0.5f, -0.5f, 0.0f,
+     		 0.0f,  0.5f, 0.0f
+	};  
 ```
 ### From learnopengl.com -- Normalized Device Coordinates
 
@@ -78,13 +78,13 @@ Modern OpenGL requires that we at least set up a vertex and fragment shader to r
 We need to write the vertex shader in GLSL (OpenGL Shading Language).
 
 ```glsl
-#version 330 core
-layout (location = 0) in vec3 aPos;
+	#version 330 core
+	layout (location = 0) in vec3 aPos;
 
-void main()
-{
-    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-}
+	void main()
+	{
+	    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+	}
 ```
 
 ### From learnopengl.com

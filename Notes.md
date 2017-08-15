@@ -100,4 +100,33 @@ To set the output of the vertex shader we have to assign the position data to th
 </div>
 
 ## Compiling a shader
-After writing the source code, OpenGL has to dynamically compile the shader at run-time from its source code.
+After writing the source code, OpenGL has to dynamically compile the shader at run-time from its source code. We store the vertex shader as a GLuint and create the shader with glCreateShader. Since we're creteing a vertex shader we pass in GL_VERTEX_SHADER. We attach the shader source to the shader object and compile. 
+
+```c++
+	unsigned int vertexShader;
+	vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+	glCompileShader(vertexShader);
+
+```
+
+glShaderSource takes four arguments:
+
+1. The shader object to compile.
+2. How many strings we're passing as source code, which is only one.
+3. The actual source code of the vertex shader.
+4. NULL
+
+It is a good idea to check if the compilation was successful. 
+
+```c++
+	int success;
+	char infoLog[512];
+	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+	if (!success) {
+		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+	}
+
+```
+

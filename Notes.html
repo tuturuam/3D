@@ -77,3 +77,24 @@
 <p>In graphics programming we use the mathematical concept of a vector quite often, since it neatly represents positions/directions in any space and has useful mathematical properties. A vector in GLSL has a maximum size of 4 and each of its values can be retrieved via vec.x, vec.y, vec.z and vec.w respectively where each of them represents a coordinate in space. Note that the vec.w component is not used as a position in space (we're dealing with 3D, not 4D) but is used for something called perspective division. We'll discuss vectors in much greater depth in a later tutorial.</p>
 <p>To set the output of the vertex shader we have to assign the position data to the predefined gl_Position variable which is a vec4 behind the scenes. At the end of the main function, whatever we set gl_Position to will be used as the output of the vertex shader. Since our input is a vector of size 3 we have to cast this to a vector of size 4. We can do this by inserting the vec3 values inside the constructor of vec4 and set its w component to 1.0f (we will explain why in a later tutorial).</p>
 </div>
+<h2 id="compiling-a-shader">Compiling a shader</h2>
+<p>After writing the source code, OpenGL has to dynamically compile the shader at run-time from its source code. We store the vertex shader as a GLuint and create the shader with glCreateShader. Since we're creteing a vertex shader we pass in GL_VERTEX_SHADER. We attach the shader source to the shader object and compile.</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">    <span class="dt">unsigned</span> <span class="dt">int</span> vertexShader;
+    vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, <span class="dv">1</span>, &amp;vertexShaderSource, NULL);
+    glCompileShader(vertexShader);</code></pre></div>
+<p>glShaderSource takes four arguments:</p>
+<ol style="list-style-type: decimal">
+<li>The shader object to compile.</li>
+<li>How many strings we're passing as source code, which is only one.</li>
+<li>The actual source code of the vertex shader.</li>
+<li>NULL</li>
+</ol>
+<p>It is a good idea to check if the compilation was successful.</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">    <span class="dt">int</span> success;
+    <span class="dt">char</span> infoLog[<span class="dv">512</span>];
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &amp;success);
+    <span class="kw">if</span> (!success) {
+        glGetShaderInfoLog(vertexShader, <span class="dv">512</span>, NULL, infoLog);
+        std::cout &lt;&lt; <span class="st">&quot;ERROR::SHADER::VERTEX::COMPILATION_FAILED</span><span class="ch">\n</span><span class="st">&quot;</span> &lt;&lt; infoLog &lt;&lt; std::endl;
+    }</code></pre></div>

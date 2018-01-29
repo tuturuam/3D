@@ -1,4 +1,6 @@
-# Hello Triangle
+# OpenGL Notes
+
+## Hello Triangle
 
 ![](/home/tuturu/Projects/Games/3D/pipeline.png)
 
